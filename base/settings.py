@@ -1,10 +1,11 @@
 from pathlib import Path
+from dotenv import dotenv_values
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-SECRET_KEY = 'django-insecure-#v=m#f(3x0=t!1)5*&z3o1_p*1)og!$*nbghab@&^*%d_q6(5o'
+config = dotenv_values(BASE_DIR / ".env")
+SECRET_KEY = config.get("SECRET_KEY")
 
 DEBUG = True
 
@@ -27,6 +28,9 @@ AUTH_USER_MODEL = 'users.CustomUser'
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend'
 ]
+
+DEFAULT_AUTO_FIELD = 'django.db.models.UUIDField'
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

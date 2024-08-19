@@ -4,7 +4,6 @@ from users.models import CustomUser
 
 
 class City(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=100)
     country = models.CharField(max_length=100)
 
@@ -13,7 +12,6 @@ class City(models.Model):
 
 
 class Weather(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     city = models.ForeignKey(City, on_delete=models.CASCADE, related_name='weather')
     temperature = models.FloatField()
     humidity = models.FloatField()
@@ -25,7 +23,6 @@ class Weather(models.Model):
 
 
 class Subscription(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='subscriptions')
     city = models.ForeignKey(City, on_delete=models.CASCADE, related_name='city_subscriptions')
     notification_period = models.IntegerField(choices=[(1, '1 hour'), (3, '3 hours'), (6, '6 hours'), (12, '12 hours')],

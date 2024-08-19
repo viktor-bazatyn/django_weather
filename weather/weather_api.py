@@ -11,7 +11,7 @@ def get_weather_coordinates(city_name):
     API_URL = f'http://api.openweathermap.org/geo/1.0/direct?q={city_name}&limit=5&appid={API_KEY}'
     response = requests.get(API_URL)
 
-    if response.status_code == 200:
+    if response:
         data = response.json()
         if data:
             latitude = data[0]['lat']

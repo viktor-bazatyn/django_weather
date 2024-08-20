@@ -31,7 +31,7 @@ def get_weather_conditions(latitude, longitude):
     API_URL = f'http://api.openweathermap.org/data/2.5/weather?lat={latitude}&lon={longitude}&appid={API_KEY}&units=metric'
     response = requests.get(API_URL)
 
-    if response.status_code == 200:
+    if response:
         data = response.json()
         if data:
             temperature = data['main']['temp']

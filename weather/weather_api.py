@@ -64,6 +64,6 @@ if lat is not None and lon is not None:
         print(f"Temperature: {temperature}°C, Humidity: {humidity}%, Weather: {weather_description}, Time: {time_getting}")
         save_weather_data.delay(city_name, country, temperature, humidity, weather_description, time_getting)
     else:
-        print("Could not retrieve weather conditions.")
+        print("Could not retrieve weather conditions")
 else:
-    print("Could not retrieve weather data.")
+    print("Could not retrieve weather data")

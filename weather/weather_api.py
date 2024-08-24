@@ -5,6 +5,7 @@ from django.utils import timezone
 from dotenv import dotenv_values
 from pathlib import Path
 
+
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'base.settings')
 django.setup()
 

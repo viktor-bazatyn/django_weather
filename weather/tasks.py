@@ -2,6 +2,7 @@ from weather.models import Weather, City
 from celery import shared_task
 
 
+
 @shared_task
 def save_weather_data(city_name, country, temperature, humidity, weather_description, time_getting):
     try:

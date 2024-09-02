@@ -1,9 +1,18 @@
 from celery import shared_task
+import logging
+import redis
 from django.utils import timezone
 import requests
 from .models import Weather, City
 from pathlib import Path
 from dotenv import dotenv_values
+import json
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+redis_instance = redis.Redis(host='localhost', port=6379, db=0)
+CACHE_TIME = 15 * 60
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 config = dotenv_values(BASE_DIR / ".env")
@@ -12,6 +21,13 @@ API_KEY = config.get('OPENWEATHER_API_KEY')
 
 @shared_task
 def get_weather_coordinates(city_name):
+    cache_key = f'coordinates:{city_name}'
+    cached_data = redis_instance.get(cache_key)
+
+    if cached_data:
+        print(f"Returning cached coordinates for {city_name}")
+        return json.loads(cached_data)
+
     API_URL = f'http://api.openweathermap.org/geo/1.0/direct?q={city_name}&limit=5&appid={API_KEY}'
     response = requests.get(API_URL)
 
@@ -21,6 +37,8 @@ def get_weather_coordinates(city_name):
             latitude = data[0]['lat']
             longitude = data[0]['lon']
             country = data[0]['country']
+            redis_instance.setex(cache_key, CACHE_TIME, json.dumps([latitude, longitude, country]))
+            print(f"Coordinates for {city_name} fetched from API and cached")
             return latitude, longitude, country
         else:
             print('No weather data in the city')
@@ -32,6 +50,12 @@ def get_weather_coordinates(city_name):
 
 @shared_task
 def get_weather_conditions(latitude, longitude):
+    cache_key = f"weather:{latitude}:{longitude}"
+    cached_data = redis_instance.get(cache_key)
+    if cached_data:
+        print(f"Returning cached weather data for {latitude}, {longitude}")
+        return json.loads(cached_data)
+
     API_URL = f'http://api.openweathermap.org/data/2.5/weather?lat={latitude}&lon={longitude}&appid={API_KEY}&units=metric'
     response = requests.get(API_URL)
 
@@ -42,6 +66,9 @@ def get_weather_conditions(latitude, longitude):
             humidity = data['main']['humidity']
             weather_description = data['weather'][0]['description']
             time_getting = timezone.now()
+            redis_instance.setex(cache_key, CACHE_TIME,
+                                 json.dumps([temperature, humidity, weather_description, str(time_getting)]))
+            print(f"Weather data for {latitude}, {longitude} fetched from API and cached")
             return temperature, humidity, weather_description, time_getting
         else:
             print('No weather data available.')

@@ -25,7 +25,7 @@ def get_weather_coordinates(city_name):
     cached_data = redis_instance.get(cache_key)
 
     if cached_data:
-        print(f"Returning cached coordinates for {city_name}")
+        logger.info(f"Returning cached coordinates for {city_name}")
         return json.loads(cached_data)
 
     API_URL = f'http://api.openweathermap.org/geo/1.0/direct?q={city_name}&limit=5&appid={API_KEY}'
@@ -38,13 +38,13 @@ def get_weather_coordinates(city_name):
             longitude = data[0]['lon']
             country = data[0]['country']
             redis_instance.setex(cache_key, CACHE_TIME, json.dumps([latitude, longitude, country]))
-            print(f"Coordinates for {city_name} fetched from API and cached")
+            logger.info(f"Coordinates for {city_name} fetched from API and cached")
             return latitude, longitude, country
         else:
-            print('No weather data in the city')
+            logger.info('No weather data in the city')
             return None, None, None
     else:
-        print(f"Error: {response.status_code}, {response.text}")
+        logger.info(f"Error: {response.status_code}, {response.text}")
         return None, None, None
 
 
@@ -53,7 +53,7 @@ def get_weather_conditions(latitude, longitude):
     cache_key = f"weather:{latitude}:{longitude}"
     cached_data = redis_instance.get(cache_key)
     if cached_data:
-        print(f"Returning cached weather data for {latitude}, {longitude}")
+        logger.info(f"Returning cached weather data for {latitude}, {longitude}")
         return json.loads(cached_data)
 
     API_URL = f'http://api.openweathermap.org/data/2.5/weather?lat={latitude}&lon={longitude}&appid={API_KEY}&units=metric'
@@ -68,13 +68,13 @@ def get_weather_conditions(latitude, longitude):
             time_getting = timezone.now()
             redis_instance.setex(cache_key, CACHE_TIME,
                                  json.dumps([temperature, humidity, weather_description, str(time_getting)]))
-            print(f"Weather data for {latitude}, {longitude} fetched from API and cached")
+            logger.info(f"Weather data for {latitude}, {longitude} fetched from API and cached")
             return temperature, humidity, weather_description, time_getting
         else:
-            print('No weather data available.')
+            logger.info('No weather data available.')
             return None, None, None, None
     else:
-        print(f"Error: {response.status_code}, {response.text}")
+        logger.info(f"Error: {response.status_code}, {response.text}")
         return None, None, None, None
 
 
@@ -84,12 +84,12 @@ def save_weather_data(city_name, country, temperature, humidity, weather_descrip
 
         city, created = City.objects.get_or_create(name=city_name, defaults={'country': country})
         if created:
-            print(f'City {city_name} in {country} created successfully')
+            logger.info(f'City {city_name} in {country} created successfully')
         else:
             if city.country != country:
                 city.country = country
                 city.save()
-                print(f'City {city_name} updated with new country {country}.')
+                logger.info(f'City {city_name} updated with new country {country}.')
 
         weather_data = Weather(
             city=city,
@@ -99,6 +99,6 @@ def save_weather_data(city_name, country, temperature, humidity, weather_descrip
             time_getting=time_getting
         )
         weather_data.save()
-        print(f'Weather data for {city.name}, {city.country} saved successfully')
+        logger.info(f'Weather data for {city.name}, {city.country} saved successfully')
     except Exception as e:
-        print(f"An error occurred while saving the weather data: {e}")
+        logger.error(f"An error occurred while saving the weather data: {e}")

@@ -5,7 +5,6 @@ from users.models import CustomUser
 from django.contrib import messages
 
 
-# Create your views here.
 def register(request):
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST)

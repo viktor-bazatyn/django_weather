@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Settings{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Settings</h1>
+
+    <!-- Card for Change Password -->
+    <div class="card mt-5 mx-auto shadow" style="max-width: 600px;">
+        <div class="card-body">
+            <h4 class="text-center">Change Password</h4>
+            <p class="text-center text-muted">Enter your current password and a new password to change it.</p>
+            <form method="post" action="{% url 'password_change' %}">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-primary w-50">Change Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Divider -->
+    <hr class="my-5">
+
+    <!-- Card for Reset Password -->
+    <div class="card mt-3 mx-auto shadow" style="max-width: 600px;">
+        <div class="card-body">
+            <h4 class="text-center">Reset Password</h4>
+            <p class="text-center text-muted">If you've forgotten your password, you can reset it here.</p>
+            <form method="post" action="{% url 'password_reset' %}">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-warning w-50">Reset Password</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

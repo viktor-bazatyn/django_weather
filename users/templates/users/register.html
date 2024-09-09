@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Register for Weather Reminder</h1>
+    <div class="card mt-3 mx-auto shadow" style="max-width: 600px;">
+        <div class="card-body">
+            {% if form.errors %}
+                <div class="alert alert-danger">
+                    <h5>There were some errors with your submission:</h5>
+                    <ul>
+                        {% for field in form %}
+                            {% for error in field.Errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+            <form method="post" novalidate>
+                {% csrf_token %}
+                <div class="mb-3 row">
+                    <label for="{{ form.username.id_for_label }}" class="col-sm-3 col-form-label text-end">{{ form.username.label }}</label>
+                    <div class="col-sm-7">
+                        {{ form.username }}
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label for="{{ form.email.id_for_label }}" class="col-sm-3 col-form-label text-end">{{ form.email.label }}</label>
+                    <div class="col-sm-7">
+                        {{ form.email }}
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label for="{{ form.password1.id_for_label }}" class="col-sm-3 col-form-label text-end">{{ form.password1.label }}</label>
+                    <div class="col-sm-7">
+                        {{ form.password1 }}
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label for="{{ form.password2.id_for_label }}" class="col-sm-3 col-form-label text-end">{{ form.password2.label }}</label>
+                    <div class="col-sm-7">
+                        {{ form.password2 }}
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg w-50">Register</button>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="{% url 'login' %}" class="btn btn-link">Already have an account? Log in</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

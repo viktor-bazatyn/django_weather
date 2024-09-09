@@ -1,7 +1,6 @@
 from pathlib import Path
 from dotenv import dotenv_values
 
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 config = dotenv_values(BASE_DIR / ".env")
@@ -10,7 +9,6 @@ SECRET_KEY = config.get("SECRET_KEY")
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -29,8 +27,7 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend'
 ]
 
-DEFAULT_AUTO_FIELD = 'django.db.models.UUIDField'
-
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -61,7 +58,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'base.wsgi.application'
-
 
 DATABASES = {
     'default': {
@@ -94,11 +90,22 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 STATIC_URL = "static/"
 MEDIA_ROOT = BASE_DIR / "media_files"
 MEDIA_URL = "/media_files/"
 STATIC_ROOT = BASE_DIR / "static"
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'bazatinviktor@gmail.com'
+EMAIL_HOST_PASSWORD = 'jlli ctxs boct jmwx'
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = "weather:home"
+LOGOUT_URL = 'logout'
+LOGOUT_REDIRECT_URL = 'login'
 
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True

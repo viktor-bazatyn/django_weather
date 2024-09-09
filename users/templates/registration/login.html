@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Login</h1>
+    <div class="card mt-3 mx-auto shadow" style="max-width: 600px;">
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3 row">
+                    <label for="{{ form.username.id_for_label }}" class="col-sm-3 col-form-label text-end">{{ form.username.label }}</label>
+                    <div class="col-sm-7">
+                        {{ form.username }}
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label for="{{ form.password.id_for_label }}" class="col-sm-3 col-form-label text-end">{{ form.password.label }}</label>
+                    <div class="col-sm-7">
+                        {{ form.password }}
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">Login</button>
+                </div>
+            </form>
+
+            <div class="text-center mt-3">
+                <a href="{% url 'password_reset' %}" class="btn btn-link">Reset password</a>
+                <a href="{% url 'register' %}" class="btn btn-link">Register</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+

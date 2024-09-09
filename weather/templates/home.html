@@ -1,1 +1,82 @@
+{% extends 'base.html' %}
 
+{% block title %}Home - Weather Reminder{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<header class="bg-primary text-white text-center py-5">
+    <div class="container">
+        <h1>Weather Subscription Service</h1>
+        <p class="lead">Stay informed about the weather in your favorite cities, receive timely updates straight to your email.</p>
+    </div>
+</header>
+
+<!-- Main Section -->
+<main class="container my-5">
+    <div class="text-center">
+        <h2 class="mb-4">How It Works</h2>
+        <div class="row">
+            <!-- Step 1 -->
+            <div class="col-md-3">
+                <div class="card shadow-sm p-4 h-100">
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="icon mb-3">
+                                <i class="fas fa-user-plus fa-3x text-primary"></i>
+                            </div>
+                            <h5 class="card-title">1. Sign Up</h5>
+                            <p class="card-text">Sign up for our service easily and quickly.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="col-md-3">
+                <div class="card shadow-sm p-4 h-100">
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="icon mb-3">
+                                <i class="fas fa-cloud-sun fa-3x text-primary"></i>
+                            </div>
+                            <h5 class="card-title">2. Subscribe</h5>
+                            <p class="card-text">Subscribe to weather updates for your favorite cities.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="col-md-3">
+                <div class="card shadow-sm p-4 h-100">
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="icon mb-3">
+                                <i class="fas fa-envelope-open-text fa-3x text-primary"></i>
+                            </div>
+                            <h5 class="card-title">3. Receive Updates</h5>
+                            <p class="card-text">Receive updates via email at your desired intervals.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 4 -->
+            <div class="col-md-3">
+                <div class="card shadow-sm p-4 h-100">
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="icon mb-3">
+                                <i class="fas fa-cogs fa-3x text-primary"></i>
+                            </div>
+                            <h5 class="card-title">4. Manage</h5>
+                            <p class="card-text">Manage your subscriptions easily at any time.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a href="{% url 'weather:create_subscription' %}" class="btn btn-primary btn-lg mt-4">Get Started</a>
+    </div>
+</main>
+{% endblock %}

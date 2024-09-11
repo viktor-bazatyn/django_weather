@@ -10,7 +10,7 @@
                     <h5>There were some errors with your submission:</h5>
                     <ul>
                         {% for field in form %}
-                            {% for error in field.Errors %}
+                            {% for error in field.errors %}
                                 <li>{{ error }}</li>
                             {% endfor %}
                         {% endfor %}
@@ -20,9 +20,15 @@
             <form method="post" novalidate>
                 {% csrf_token %}
                 <div class="mb-3 row">
-                    <label for="{{ form.username.id_for_label }}" class="col-sm-3 col-form-label text-end">{{ form.username.label }}</label>
+                    <label for="{{ form.first_name.id_for_label }}" class="col-sm-3 col-form-label text-end">{{ form.first_name.label }}</label>
                     <div class="col-sm-7">
-                        {{ form.username }}
+                        {{ form.first_name }}
+                    </div>
+                </div>
+                <div class="mb-3 row">
+                    <label for="{{ form.last_name.id_for_label }}" class="col-sm-3 col-form-label text-end">{{ form.last_name.label }}</label>
+                    <div class="col-sm-7">
+                        {{ form.last_name }}
                     </div>
                 </div>
                 <div class="mb-3 row">

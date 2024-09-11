@@ -38,6 +38,9 @@
                 {% else %}
                     {% if user.is_authenticated %}
                         <li class="nav-item">
+                            <span class="nav-link text-light">Hi,{{ user.first_name }}</span>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="{% url 'weather:create_subscription' %}">Create_subscription</a>
                         </li>
                         <li class="nav-item">

@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Subscription Details</h1>
+    <div class="card mt-3 mx-auto" style="max-width: 600px;">
+        <div class="card-body">
+            <h4>City: {{ subscription.city }}</h4>
+            <p>Notification Period: {{ subscription.notification_period }} hours</p>
+            <p>Subscription Date: {{ subscription.subscription_date }}</p>
+            <a href="{% url 'weather:update_subscription' subscription.id %}" class="btn btn-warning">Update</a>
+            <form method="post" action="{% url 'weather:delete_subscription' subscription.id %}" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Delete</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

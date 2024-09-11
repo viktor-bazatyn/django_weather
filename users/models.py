@@ -11,12 +11,14 @@ def get_avatar_path(instance, filename):
 
 class CustomUser(AbstractUser):
     username = None
+    first_name = models.CharField(max_length=30, blank=True)
+    last_name = models.CharField(max_length=30, blank=True)
     email = models.EmailField(unique=True)
     avatar = models.ImageField(upload_to=get_avatar_path, null=True, blank=True)
     location = models.TextField(null=True, blank=True)
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ['first_name', 'last_name']
 
     def __str__(self):
         return self.email

@@ -2,18 +2,17 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h1 class="text-center">Create Subscription</h1>
+    <h1 class="text-center">Update Subscription</h1>
     <div class="card mt-3 mx-auto" style="max-width: 600px;">
         <div class="card-body">
             <form method="post">
                 {% csrf_token %}
                 {{ form.as_p }}
                 <div class="text-center mt-3">
-                    <button type="submit" class="btn btn-primary">Create Subscription</button>
+                    <button type="submit" class="btn btn-primary">Update Subscription</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 {% endblock %}
-

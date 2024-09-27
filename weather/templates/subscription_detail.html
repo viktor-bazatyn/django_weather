@@ -8,6 +8,19 @@
             <h4>City: {{ subscription.city }}</h4>
             <p>Notification Period: {{ subscription.notification_period }} hours</p>
             <p>Subscription Date: {{ subscription.subscription_date }}</p>
+
+            {% if weather_data %}
+                <h5>Weather Data:</h5>
+                <ul>
+                    <li>Temperature: {{ weather_data.temperature }}°C</li>
+                    <li>Humidity: {{ weather_data.humidity }}%</li>
+                    <li>Description: {{ weather_data.weather_description }}</li>
+                    <li>Time of Data: {{ weather_data.time_getting }}</li>
+                </ul>
+            {% else %}
+                <p>No weather data available for this city.</p>
+            {% endif %}
+
             <a href="{% url 'weather:update_subscription' subscription.id %}" class="btn btn-warning">Update</a>
             <form method="post" action="{% url 'weather:delete_subscription' subscription.id %}" class="d-inline">
                 {% csrf_token %}

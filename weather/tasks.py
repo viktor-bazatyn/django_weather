@@ -11,7 +11,7 @@ import json
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-redis_instance = redis.Redis(host='localhost', port=6379, db=0)
+redis_instance = redis.Redis(host='redis', port=6379, db=0)
 CACHE_TIME = 15 * 60
 
 BASE_DIR = Path(__file__).resolve().parent.parent

@@ -7,16 +7,17 @@ from .models import Weather, City
 from pathlib import Path
 from dotenv import dotenv_values
 import json
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-redis_instance = redis.Redis(host='redis', port=6379, db=0)
-CACHE_TIME = 15 * 60
+from base.settings import REDIS_HOST, REDIS_PORT
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 config = dotenv_values(BASE_DIR / ".env")
 API_KEY = config.get('OPENWEATHER_API_KEY')
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+redis_instance = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=0)
+CACHE_TIME = 15 * 60
 
 
 @shared_task

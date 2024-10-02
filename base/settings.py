@@ -9,7 +9,7 @@ SECRET_KEY = config.get("SECRET_KEY")
 
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [config.get("ALLOWED_HOST")]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -126,3 +126,4 @@ CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL')
 CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND')
 REDIS_HOST = os.environ.get('REDIS_HOST')
 REDIS_PORT = os.environ.get('REDIS_PORT')
+

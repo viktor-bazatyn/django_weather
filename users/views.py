@@ -3,7 +3,8 @@ from django.shortcuts import redirect, render
 from users.forms import CustomUserCreationForm
 from users.models import CustomUser
 from django.contrib import messages
-
+from rest_framework import generics
+from .serializers import UserSerializer
 
 def register(request):
     if request.method == "POST":
@@ -22,3 +23,8 @@ def register(request):
     else:
         form = CustomUserCreationForm()
         return render(request, "users/register.html", {"form": form})
+
+
+class RegisterUser(generics.CreateAPIView):
+    serializer_class = UserSerializer
+

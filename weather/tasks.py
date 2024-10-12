@@ -7,16 +7,18 @@ from .models import Weather, City
 from pathlib import Path
 from dotenv import dotenv_values
 import json
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-redis_instance = redis.Redis(host='localhost', port=6379, db=0)
-CACHE_TIME = 15 * 60
+from base.settings import REDIS_HOST, REDIS_PORT
+from django_celery_beat.models import PeriodicTask, IntervalSchedule
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 config = dotenv_values(BASE_DIR / ".env")
 API_KEY = config.get('OPENWEATHER_API_KEY')
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+redis_instance = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, db=0)
+CACHE_TIME = 15 * 60
 
 
 @shared_task
@@ -102,3 +104,37 @@ def save_weather_data(city_name, country, temperature, humidity, weather_descrip
         logger.info(f'Weather data for {city.name}, {city.country} saved successfully')
     except Exception as e:
         logger.error(f"An error occurred while saving the weather data: {e}")
+
+
+@shared_task
+def update_weather_for_all_cities():
+    logger.info("Task 'update_weather_for_all_cities' started.")
+    cities = City.objects.all()
+    for city in cities:
+
+        latitude, longitude, country = get_weather_coordinates(city.name)
+        if not latitude or not longitude or not country:
+            logger.info(f'No coordinates for {city.name}')
+            continue
+
+        temperature, humidity, weather_description, time_getting = get_weather_conditions(latitude, longitude)
+        if temperature and humidity and weather_description:
+
+            save_weather_data.delay(city.name, country, temperature, humidity, weather_description, time_getting)
+            logger.info(f"Weather data for city {city.name} updated and cached in Redis.")
+        else:
+            logger.error(f"Failed to get weather data for city: {city.name}")
+    logger.info("Task 'update_weather_for_all_cities' finished.")
+
+
+def schedule_weather_reminder():
+    schedule, _ = IntervalSchedule.objects.get_or_create(
+        every=15,
+        period=IntervalSchedule.MINUTES,
+    )
+    PeriodicTask.objects.create(
+        interval=schedule,
+        name='Update weather data every 15 minutes',
+        task='weather.tasks.update_weather_for_all_cities',
+    )
+    logger.info("Scheduled periodic task 'Update weather data every 15 minutes' successfully.")

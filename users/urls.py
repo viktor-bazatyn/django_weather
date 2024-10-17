@@ -30,5 +30,5 @@ urlpatterns = [
                                                                                           '/password_changed.html'),
          name='password_change_done'),
     path("logouts/", auth_views.LogoutView.as_view(next_page='weather:home'), name="logouts"),
-    path('api/v1/user/register/', RegisterUser.as_view(), name='register'),
+    path('api/v1/user/register/', RegisterUser.as_view(), name='register_api'),
 ]

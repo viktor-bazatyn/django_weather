@@ -3,12 +3,15 @@ import logging
 import redis
 from django.utils import timezone
 import requests
-from .models import Weather, City
+
+from base import settings
+from .models import Weather, City, Subscription
 from pathlib import Path
 from dotenv import dotenv_values
 import json
 from base.settings import REDIS_HOST, REDIS_PORT
 from django_celery_beat.models import PeriodicTask, IntervalSchedule
+from django.core.mail import send_mail
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 config = dotenv_values(BASE_DIR / ".env")
@@ -110,8 +113,8 @@ def save_weather_data(city_name, country, temperature, humidity, weather_descrip
 def update_weather_for_all_cities():
     logger.info("Task 'update_weather_for_all_cities' started.")
     cities = City.objects.all()
-    for city in cities:
 
+    for city in cities:
         latitude, longitude, country = get_weather_coordinates(city.name)
         if not latitude or not longitude or not country:
             logger.info(f'No coordinates for {city.name}')
@@ -122,8 +125,37 @@ def update_weather_for_all_cities():
 
             save_weather_data.delay(city.name, country, temperature, humidity, weather_description, time_getting)
             logger.info(f"Weather data for city {city.name} updated and cached in Redis.")
+
+            subscriptions = Subscription.objects.filter(city=city)
+            for subscription in subscriptions:
+
+                if subscription.last_notified is None or \
+                        (
+                                timezone.now() - subscription.last_notified).total_seconds() >= subscription.notification_period * 3600:
+                    subject = f'Weather Update for {city.name}'
+                    message = (
+                        f'Hello {subscription.user.email},\n\n'
+                        f'The weather in {city.name} is currently {weather_description} '
+                        f'with a temperature of {temperature}°C and humidity of {humidity}%.\n\n'
+                        f'Time of report: {time_getting.strftime("%Y-%m-%d %H:%M:%S")}\n\n'
+                        f'Best regards,\nYour Weather Service'
+                    )
+
+                    send_mail(
+                        subject=subject,
+                        message=message,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[subscription.user.email],
+                        fail_silently=False,
+                    )
+
+                    subscription.last_notified = timezone.now()
+                    subscription.save()
+
+                    logger.info(f"Weather update email sent to {subscription.user.email} for city {city.name}")
         else:
             logger.error(f"Failed to get weather data for city: {city.name}")
+
     logger.info("Task 'update_weather_for_all_cities' finished.")
 
 

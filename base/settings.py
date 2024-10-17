@@ -7,7 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 config = dotenv_values(BASE_DIR / ".env")
 SECRET_KEY = config.get("SECRET_KEY")
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [config.get("ALLOWED_HOST")]
 
@@ -79,11 +79,11 @@ WSGI_APPLICATION = 'base.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.environ.get("POSTGRES_DB"),
-        "USER": os.environ.get("POSTGRES_USER"),
-        "PASSWORD": os.environ.get("POSTGRES_PASSWORD"),
-        "HOST": os.environ.get("POSTGRES_HOST"),
-        "PORT": os.environ.get("POSTGRES_PORT"),
+        "NAME": config.get("POSTGRES_DB"),
+        "USER": config.get("POSTGRES_USER"),
+        "PASSWORD": config.get("POSTGRES_PASSWORD"),
+        "HOST": config.get("POSTGRES_HOST"),
+        "PORT": config.get("POSTGRES_PORT"),
     }
 }
 # AUTH_PASSWORD_VALIDATORS = [
@@ -131,8 +131,9 @@ CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 
-CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL')
-CELERY_RESULT_BACKEND = os.environ.get('CELERY_RESULT_BACKEND')
-REDIS_HOST = os.environ.get('REDIS_HOST')
-REDIS_PORT = os.environ.get('REDIS_PORT')
+CELERY_BROKER_URL = config.get('CELERY_BROKER_URL')
+CELERY_RESULT_BACKEND = config.get('CELERY_RESULT_BACKEND')
+REDIS_HOST = config.get('REDIS_HOST')
+REDIS_PORT = config.get('REDIS_PORT')
 
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')

@@ -27,8 +27,11 @@ services:
     depends_on:
       - db
       - redis
+    volumes:
+      - static_data:/home/app/static
     ports:
       - "8000:8000"
 
 volumes:
   postgres_data:
+  static_data:

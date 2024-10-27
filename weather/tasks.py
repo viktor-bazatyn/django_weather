@@ -1,8 +1,10 @@
 from celery import shared_task
 import logging
 import redis
+from django.template.loader import render_to_string
 from django.utils import timezone
 import requests
+from django.utils.html import strip_tags
 
 from base import settings
 from .models import Weather, City, Subscription
@@ -109,6 +111,19 @@ def save_weather_data(city_name, country, temperature, humidity, weather_descrip
         logger.error(f"An error occurred while saving the weather data: {e}")
 
 
+def get_weather_icon(description):
+    description = description.lower()
+    if 'clear sky' in description:
+        return 'https://cdn-icons-png.flaticon.com/512/869/869869.png'
+    elif ('broken clouds' in description or 'scattered clouds' in description or 'overcast clouds' in description
+          or 'few clouds' in description):
+        return 'https://cdn-icons-png.flaticon.com/512/414/414825.png'
+    elif 'light rain' in description:
+        return 'https://openweathermap.org/img/wn/10d@2x.png'
+    else:
+        return 'https://openweathermap.org/img/wn/50d@2x.png'
+
+
 @shared_task
 def update_weather_for_all_cities():
     logger.info("Task 'update_weather_for_all_cities' started.")
@@ -128,24 +143,30 @@ def update_weather_for_all_cities():
 
             subscriptions = Subscription.objects.filter(city=city)
             for subscription in subscriptions:
-
                 if subscription.last_notified is None or \
                         (
                                 timezone.now() - subscription.last_notified).total_seconds() >= subscription.notification_period * 3600:
+                    context = {
+                        'city_name': city.name,
+                        'user_email': subscription.user.first_name,
+                        'weather_description': weather_description,
+                        'temperature': temperature,
+                        'humidity': humidity,
+                        'time_getting': time_getting.strftime("%Y-%m-%d %H:%M:%S"),
+                        'weather_icon': get_weather_icon(weather_description)
+                    }
+
+                    html_message = render_to_string('weather_email.html', context)
+                    plain_message = strip_tags(html_message)
+
                     subject = f'Weather Update for {city.name}'
-                    message = (
-                        f'Hello {subscription.user.email},\n\n'
-                        f'The weather in {city.name} is currently {weather_description} '
-                        f'with a temperature of {temperature}°C and humidity of {humidity}%.\n\n'
-                        f'Time of report: {time_getting.strftime("%Y-%m-%d %H:%M:%S")}\n\n'
-                        f'Best regards,\nYour Weather Service'
-                    )
 
                     send_mail(
                         subject=subject,
-                        message=message,
+                        message=plain_message,
                         from_email=settings.DEFAULT_FROM_EMAIL,
                         recipient_list=[subscription.user.email],
+                        html_message=html_message,
                         fail_silently=False,
                     )
 

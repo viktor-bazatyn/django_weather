@@ -14,6 +14,7 @@ import json
 from base.settings import REDIS_HOST, REDIS_PORT
 from django_celery_beat.models import PeriodicTask, IntervalSchedule
 from django.core.mail import send_mail
+from pytz import timezone as pytz_timezone
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 config = dotenv_values(BASE_DIR / ".env")
@@ -137,32 +138,34 @@ def update_weather_for_all_cities():
 
         temperature, humidity, weather_description, time_getting = get_weather_conditions(latitude, longitude)
         if temperature and humidity and weather_description:
-
             save_weather_data.delay(city.name, country, temperature, humidity, weather_description, time_getting)
             logger.info(f"Weather data for city {city.name} updated and cached in Redis.")
 
             subscriptions = Subscription.objects.filter(city=city)
             for subscription in subscriptions:
                 if subscription.last_notified is None or \
-                        (
-                                timezone.now() - subscription.last_notified).total_seconds() >= subscription.notification_period * 3600:
+                        (timezone.now() - subscription.last_notified).total_seconds() >= subscription.notification_period * 3600:
+
+                    user_timezone = subscription.timezone or 'UTC'
+                    tz = pytz_timezone(user_timezone)
+
+                    local_time = time_getting.astimezone(tz).strftime('%Y-%m-%d %H:%M:%S')
+
                     context = {
                         'city_name': city.name,
                         'user_email': subscription.user.first_name,
                         'weather_description': weather_description,
                         'temperature': temperature,
                         'humidity': humidity,
-                        'time_getting': time_getting.strftime("%Y-%m-%d %H:%M:%S"),
+                        'time_getting': local_time,
                         'weather_icon': get_weather_icon(weather_description)
                     }
 
                     html_message = render_to_string('weather_email.html', context)
                     plain_message = strip_tags(html_message)
 
-                    subject = f'Weather Update for {city.name}'
-
                     send_mail(
-                        subject=subject,
+                        subject=f'Weather Update for {city.name}',
                         message=plain_message,
                         from_email=settings.DEFAULT_FROM_EMAIL,
                         recipient_list=[subscription.user.email],

@@ -15,7 +15,7 @@
                     <li>Temperature: {{ weather_data.temperature }}°C</li>
                     <li>Humidity: {{ weather_data.humidity }}%</li>
                     <li>Description: {{ weather_data.weather_description }}</li>
-                    <li>Time of Data: {{ weather_data.time_getting }}</li>
+                    <li>Time of Data: <span id="time-of-data">{{ weather_data.time_getting }}</span></li>
                 </ul>
             {% else %}
                 <p>No weather data available for this city.</p>
@@ -29,4 +29,31 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const timeOfDataElement = document.getElementById('time-of-data');
+        const timeOfData = timeOfDataElement.innerText.trim();
+        const localDate = new Date(timeOfData);
+
+        if (isNaN(localDate)) {
+            console.error('Invalid Date:', timeOfData);
+            timeOfDataElement.innerText = 'Invalid Date';
+            return;
+        }
+
+        const formattedTime = localDate.toLocaleString('uk-UA', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            timeZoneName: 'short'
+        });
+
+        timeOfDataElement.innerText = formattedTime;
+    });
+</script>
+
 {% endblock %}

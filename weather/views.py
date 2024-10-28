@@ -7,6 +7,7 @@ from rest_framework import generics, permissions, status
 from .serializers import SubscriptionSerializer
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.utils.timezone import localtime
 
 
 def home(request):
@@ -84,7 +85,14 @@ def subscription_detail(request, subscription_id):
     city = subscription.city
     weather_data = Weather.objects.filter(city=city).order_by('-time_getting').first()
 
-    if not weather_data:
+    if weather_data:
+        weather_data = {
+            'temperature': weather_data.temperature,
+            'humidity': weather_data.humidity,
+            'weather_description': weather_data.weather_description,
+            'time_getting': localtime(weather_data.time_getting).isoformat(),  # Формат ISO 8601
+        }
+    else:
         coordinates_result = get_weather_coordinates.delay(city.name)
         coordinates = coordinates_result.get()
 
@@ -99,7 +107,7 @@ def subscription_detail(request, subscription_id):
                     'temperature': temperature,
                     'humidity': humidity,
                     'weather_description': weather_description,
-                    'time_getting': time_getting,
+                    'time_getting': time_getting.isoformat() if time_getting else None,
                 }
         else:
             weather_data = None
@@ -200,7 +208,8 @@ class UpdateSubscription(APIView):
         city_name = request.data.get("city_name", None)
         notification_period = request.data.get("notification_period", None)
         if not city_name or not notification_period:
-            return Response({"deatil": f'City name and notification period is required.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"deatil": f'City name and notification period is required.'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
         city = get_object_or_404(City, name=city_name)
         subscription = get_object_or_404(Subscription, user=request.user, city=city)

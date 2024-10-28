@@ -1,5 +1,6 @@
 from django.db import models
 from users.models import CustomUser
+from pytz import all_timezones
 
 
 class City(models.Model):
@@ -28,6 +29,8 @@ class Subscription(models.Model):
                                               default=1)
     subscription_date = models.DateTimeField(auto_now_add=True)
     last_notified = models.DateTimeField(null=True, blank=True)
+
+    timezone = models.CharField(max_length=50, choices=[(tz, tz) for tz in all_timezones], default='UTC')
 
     def __str__(self):
         return f"Subscription of {self.user.email} to {self.city.name}"

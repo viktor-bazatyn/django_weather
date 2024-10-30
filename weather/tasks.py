@@ -1,8 +1,10 @@
 from celery import shared_task
 import logging
 import redis
+from django.template.loader import render_to_string
 from django.utils import timezone
 import requests
+from django.utils.html import strip_tags
 
 from base import settings
 from .models import Weather, City, Subscription
@@ -12,6 +14,7 @@ import json
 from base.settings import REDIS_HOST, REDIS_PORT
 from django_celery_beat.models import PeriodicTask, IntervalSchedule
 from django.core.mail import send_mail
+from pytz import timezone as pytz_timezone
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 config = dotenv_values(BASE_DIR / ".env")
@@ -109,6 +112,19 @@ def save_weather_data(city_name, country, temperature, humidity, weather_descrip
         logger.error(f"An error occurred while saving the weather data: {e}")
 
 
+def get_weather_icon(description):
+    description = description.lower()
+    if 'clear sky' in description:
+        return 'https://cdn-icons-png.flaticon.com/512/869/869869.png'
+    elif ('broken clouds' in description or 'scattered clouds' in description or 'overcast clouds' in description
+          or 'few clouds' in description):
+        return 'https://cdn-icons-png.flaticon.com/512/414/414825.png'
+    elif 'light rain' in description:
+        return 'https://openweathermap.org/img/wn/10d@2x.png'
+    else:
+        return 'https://openweathermap.org/img/wn/50d@2x.png'
+
+
 @shared_task
 def update_weather_for_all_cities():
     logger.info("Task 'update_weather_for_all_cities' started.")
@@ -122,30 +138,38 @@ def update_weather_for_all_cities():
 
         temperature, humidity, weather_description, time_getting = get_weather_conditions(latitude, longitude)
         if temperature and humidity and weather_description:
-
             save_weather_data.delay(city.name, country, temperature, humidity, weather_description, time_getting)
             logger.info(f"Weather data for city {city.name} updated and cached in Redis.")
 
             subscriptions = Subscription.objects.filter(city=city)
             for subscription in subscriptions:
-
                 if subscription.last_notified is None or \
-                        (
-                                timezone.now() - subscription.last_notified).total_seconds() >= subscription.notification_period * 3600:
-                    subject = f'Weather Update for {city.name}'
-                    message = (
-                        f'Hello {subscription.user.email},\n\n'
-                        f'The weather in {city.name} is currently {weather_description} '
-                        f'with a temperature of {temperature}°C and humidity of {humidity}%.\n\n'
-                        f'Time of report: {time_getting.strftime("%Y-%m-%d %H:%M:%S")}\n\n'
-                        f'Best regards,\nYour Weather Service'
-                    )
+                        (timezone.now() - subscription.last_notified).total_seconds() >= subscription.notification_period * 3600:
+
+                    user_timezone = subscription.timezone or 'UTC'
+                    tz = pytz_timezone(user_timezone)
+
+                    local_time = time_getting.astimezone(tz).strftime('%Y-%m-%d %H:%M:%S')
+
+                    context = {
+                        'city_name': city.name,
+                        'user_email': subscription.user.first_name,
+                        'weather_description': weather_description,
+                        'temperature': temperature,
+                        'humidity': humidity,
+                        'time_getting': local_time,
+                        'weather_icon': get_weather_icon(weather_description)
+                    }
+
+                    html_message = render_to_string('weather_email.html', context)
+                    plain_message = strip_tags(html_message)
 
                     send_mail(
-                        subject=subject,
-                        message=message,
+                        subject=f'Weather Update for {city.name}',
+                        message=plain_message,
                         from_email=settings.DEFAULT_FROM_EMAIL,
                         recipient_list=[subscription.user.email],
+                        html_message=html_message,
                         fail_silently=False,
                     )
 

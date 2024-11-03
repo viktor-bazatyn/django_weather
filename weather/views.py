@@ -11,11 +11,18 @@ from django.utils.timezone import localtime
 
 
 def home(request):
+    """
+        Main page.
+    """
     return render(request, 'home.html')
 
 
 @login_required
 def create_subscription(request):
+    """
+        Create a new city subscription to get weather data.
+        Checks if the city exists and adds it to the user's subscriptions.
+    """
     if request.method == 'POST':
         form = SubscriptionForm(request.POST)
         if form.is_valid():
@@ -44,16 +51,25 @@ def create_subscription(request):
 
 @login_required
 def view_subscriptions(request):
+    """
+        View all user subscriptions.
+    """
     subscriptions = Subscription.objects.filter(user=request.user)
     return render(request, 'view_subscriptions.html', {'subscriptions': subscriptions})
 
 
 def settings(request):
+    """
+        Configuration for the user.
+    """
     return render(request, 'settings.html')
 
 
 @login_required
 def update_subscription(request, id):
+    """
+        Update an existing city subscription.
+    """
     subscription = get_object_or_404(Subscription, id=id, user=request.user)
 
     if request.method == 'POST':
@@ -69,6 +85,9 @@ def update_subscription(request, id):
 
 @login_required
 def delete_subscription(request, id):
+    """
+        Delete a user's subscription to a specific city.
+    """
     subscription = get_object_or_404(Subscription, id=id, user=request.user)
 
     if request.method == 'POST':
@@ -80,6 +99,9 @@ def delete_subscription(request, id):
 
 @login_required
 def subscription_detail(request, subscription_id):
+    """
+        Detailed information about the city subscription, including the latest weather data.
+    """
     subscription = get_object_or_404(Subscription, id=subscription_id)
 
     city = subscription.city
@@ -119,26 +141,47 @@ def subscription_detail(request, subscription_id):
 
 
 class SubscriptionCreate(generics.CreateAPIView):
+    """
+        Create a subscription via API.
+        Available only for authenticated users.
+    """
     queryset = Subscription.objects.all()
     serializer_class = SubscriptionSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):
+        """
+            Assigns a subscription to the current user.
+        """
         serializer.save(user=self.request.user)
 
 
 class SubscriptionList(generics.ListAPIView):
+    """
+        Retrieving user subscription list via API.
+        Available only for authenticated users.
+    """
     serializer_class = SubscriptionSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
+        """
+            Returns only the current user's subscriptions.
+        """
         return Subscription.objects.filter(user=self.request.user)
 
 
 class SubscriptionDeleteCity(APIView):
+    """
+        Delete a city subscription via API.
+        Available only for authenticated users.
+    """
     permission_classes = [permissions.IsAuthenticated]
 
-    def delete_city(self, request):
+    def delete(self, request):
+        """
+            Removes the subscription to the specified city for the current user.
+        """
         city_name = request.data.get("city_name")
 
         if not city_name:
@@ -158,9 +201,15 @@ class SubscriptionDeleteCity(APIView):
 
 
 class CityWeatherDetailApi(APIView):
+    """
+        Obtaining weather data for a specific city through the API.
+    """
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
+        """
+            Returns weather data for a given city.
+        """
         city_name = request.query_params.get("city_name", None)
         if not city_name:
             return Response({"detail": "City name is required."}, status=status.HTTP_400_BAD_REQUEST)
@@ -202,9 +251,15 @@ class CityWeatherDetailApi(APIView):
 
 
 class UpdateSubscription(APIView):
+    """
+        Update notification period for user subscription via API.
+    """
     permission_classes = [permissions.IsAuthenticated]
 
     def put(self, request):
+        """
+            Updates the notification period for the subscription to the specified city.
+        """
         city_name = request.data.get("city_name", None)
         notification_period = request.data.get("notification_period", None)
         if not city_name or not notification_period:

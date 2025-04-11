@@ -6,7 +6,13 @@ from django.contrib import messages
 from rest_framework import generics
 from .serializers import UserSerializer
 
+
 def register(request):
+    """
+        Register a new user.
+        If a user with this email already exists, an error message is displayed.
+        If not - creates a new user, logs in and redirects to the home page.
+    """
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
@@ -26,5 +32,8 @@ def register(request):
 
 
 class RegisterUser(generics.CreateAPIView):
+    """
+        API for creating a new user.
+        Uses the UserSerializer to create a user.
+    """
     serializer_class = UserSerializer
-

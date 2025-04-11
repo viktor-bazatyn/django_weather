@@ -20,10 +20,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'weather',
     'users',
-    'django_celery_beat'
+    'django_celery_beat',
+    'drf_spectacular',
 ]
-
-
 
 AUTH_USER_MODEL = 'users.CustomUser'
 
@@ -32,6 +31,7 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
@@ -48,6 +48,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
 
 ROOT_URLCONF = 'base.urls'
 
@@ -66,6 +67,12 @@ TEMPLATES = [
         },
     },
 ]
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Weather API',
+    'DESCRIPTION': 'API documentation for Weather Reminder application',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}
 
 WSGI_APPLICATION = 'base.wsgi.application'
 

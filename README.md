@@ -1,1 +1,1 @@
-# DjangoWeatherReminder
+# DjangoWeather

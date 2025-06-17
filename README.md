@@ -30,7 +30,23 @@ with the current weather conditions for their chosen city.
 
 ```git clone git@github.com:viktor-bazatyn/django_weather.git```
 
-2. Create .env file
+2. Create and activate a virtual environment
+
+    * for Linux/macOS
+    ```python3 -m venv venv```
+
+    ```source venv/bin/activate```
+
+    * for Windows
+    ```python -m venv venv```
+
+    ```venv\Scripts\activate```
+
+3. Install dependencies
+
+```pip install -r requirements.txt```
+
+4. Create .env file
 
 Create a .env file in the root of the project with the following content:
 ```
@@ -60,7 +76,7 @@ DEFAULT_FROM_EMAIL=your_email@example.com
 ALLOWED_HOST=127.0.0.1
 ```
 
-3. Run Migrations
+5. Run Migrations
 
 Before running the containers, make migrations locally:
 
@@ -74,7 +90,7 @@ Once everything is up, apply the migrations inside the container:
 
 ```docker-compose exec web python manage.py migrate```
 
-4. Run Celery & Beat
+6. Run Celery & Beat
 
 Open two terminals and run:
 
@@ -86,7 +102,7 @@ Celery Worker:
 
 ```docker-compose exec web  celery -A base worker -l INFO ```
 
-5. Manually Schedule the Weather Reminder Task
+7. Manually Schedule the Weather Reminder Task
 
 ```angular2html
 docker-compose exec web python manage.py shell

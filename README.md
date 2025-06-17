@@ -33,11 +33,13 @@ with the current weather conditions for their chosen city.
 2. Create and activate a virtual environment
 
     * for Linux/macOS
+   
     ```python3 -m venv venv```
 
     ```source venv/bin/activate```
 
     * for Windows
+   
     ```python -m venv venv```
 
     ```venv\Scripts\activate```

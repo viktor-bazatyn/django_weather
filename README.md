@@ -94,9 +94,7 @@ docker-compose exec web python manage.py shell
 >>> schedule_weather_reminder()
 ```
 
-
 📫 Email Notifications
 
 Users choose a city and how often they'd like to receive updates (e.g., hourly).
 Celery fetches weather data from the OpenWeatherMap API and sends it to the registered email address.
-
